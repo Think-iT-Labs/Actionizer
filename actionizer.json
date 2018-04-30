@@ -9,7 +9,7 @@
 		}
 	},
 	"http_listen": "127.0.0.1",
-	"http_port": 8080,
+	"http_port": 8002,
 	"action_duration": "10s",
 	"slack": {
 		"token_env": "SLACK_TOKEN",

@@ -113,7 +113,8 @@ func main() {
 		if len(tasks) == 0 {
 			log.Infof("No weekly task found, creating new one.")
 			// utils.StartOfWeek(time.Now())
-			datastore.NewRandomTask(ds, utils.StartOfWeek(time.Now()))
+			task, _ := datastore.NewRandomTask(ds, utils.StartOfWeek(time.Now()))
+			slackChan <- task
 		}
 
 		for {
