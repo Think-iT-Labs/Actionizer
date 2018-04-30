@@ -1,0 +1,18 @@
+{
+	"datastore": {
+		"backend": "jsonfile",
+		"params": {
+			"actions_file": "actions.json",
+			"users_file": "users.json",
+			"tasks_file": "tasks.json",
+			"done_tasks_file": "done_tasks.json"
+		}
+	},
+	"http_listen": "127.0.0.1",
+	"http_port": 8080,
+	"action_duration": "10s",
+	"slack": {
+		"token_env": "SLACK_TOKEN",
+		"channel": "#actionizer"
+	}
+}
