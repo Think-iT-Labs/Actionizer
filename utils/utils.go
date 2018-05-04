@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
@@ -78,4 +79,18 @@ func AddFileWatcher(filename string, callback func()) error {
 	}
 
 	return nil
+}
+
+var colors = []string{
+	"Red",
+	"Yellow",
+	"Blue",
+	"Pink",
+	"Green",
+	"Black",
+	"White",
+}
+
+func RandColor() string {
+	return colors[rand.Intn(len(colors))]
 }

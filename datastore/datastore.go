@@ -2,12 +2,14 @@ package datastore
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/think-it-labs/actionizer/models"
+	"github.com/think-it-labs/actionizer/utils"
 )
 
 type DataStore interface {
@@ -31,7 +33,44 @@ type CreatorFunc func(Config) (DataStore, error)
 
 var backends map[string]CreatorFunc
 
+// temporarly solution. TODO: fix
+type ActionModifierFunc func(DataStore, *models.Action) *models.Action
+
+var actionsModifiers map[string]ActionModifierFunc
+
+var requireRandUserList = []string{
+	"Be the right-hand of another Think.iteer for 1 hour",
+	"Jynx: Don't Talk untill someone  calls your name",
+}
+
+var requireRandColorList = []string{
+	"Wear the same color for two days",
+}
+
 func init() {
+	actionsModifiers = make(map[string]ActionModifierFunc)
+
+	for _, specialAction := range requireRandUserList {
+		actionsModifiers[specialAction] = func(ds DataStore, action *models.Action) *models.Action {
+			users, err := ds.GetUsers()
+			if err != nil {
+				log.Errorf("Cannot load users")
+				return action
+			}
+
+			choosenUser := pickRandomUser(users)
+			action.Description = fmt.Sprintf(action.Description, choosenUser.Fullname)
+
+			return action
+		}
+	}
+
+	for _, specialAction := range requireRandColorList {
+		actionsModifiers[specialAction] = func(ds DataStore, action *models.Action) *models.Action {
+			action.Description = fmt.Sprintf(action.Description, utils.RandColor())
+			return action
+		}
+	}
 
 }
 
@@ -103,6 +142,11 @@ func NewRandomTask(ds DataStore, start time.Time) (models.Task, error) {
 	choosenAction := pickRandomAction(actions)
 	log.Debugf("Choosen Action: %+v", choosenAction)
 
+	if modifierCall, ok := actionsModifiers[choosenAction.ID]; ok {
+		choosenAction = modifierCall(ds, choosenAction)
+		log.Debugf("After modification: %+v", choosenAction)
+	}
+
 	taskID := uuid.Must(uuid.NewV4())
 
 	task := models.Task{
@@ -127,6 +171,11 @@ func NewRandomEnforcedTask(ds DataStore, user models.User, start time.Time) (mod
 
 	choosenAction := pickRandomAction(actions)
 	log.Debugf("Choosen Action for user %q: %+v", user.Fullname, choosenAction)
+
+	if modifierCall, ok := actionsModifiers[choosenAction.ID]; ok {
+		choosenAction = modifierCall(ds, choosenAction)
+		log.Debugf("After modification: %+v", choosenAction)
+	}
 
 	taskID := uuid.Must(uuid.NewV4())
 
