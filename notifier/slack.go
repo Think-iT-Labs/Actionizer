@@ -25,12 +25,15 @@ func NewSlackNotifier(config SlackConfig) chan<- models.Task {
 	api := slack.New(os.Getenv(config.TokenEnv))
 	go func() {
 		for task := range ch {
-			text := fmt.Sprintf("*New <https://actionizer.think-it.io/|Actionizer> Item:*\n*%s:* _%s_", task.User.Fullname, task.Action.Description)
+			taskType := "weekly"
+			if task.Enforced {
+				taskType = "enforced"
+			}
+			text := fmt.Sprintf("*New %s <https://actionizer.think-it.io/|Actionizer> Item:*\n*%s:* _%s_", taskType, task.User.Fullname, task.Action.Description)
 			_, _, err := api.PostMessage(config.Channel, text, params)
 			if err != nil {
 				log.Errorf("Error sending slack notification: %v", err)
 			}
-
 		}
 	}()
 	return ch

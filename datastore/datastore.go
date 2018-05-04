@@ -121,6 +121,10 @@ func NewRandomEnforcedTask(ds DataStore, user models.User, start time.Time) (mod
 	rand.Seed(time.Now().UnixNano())
 
 	actions, _ := ds.GetActions()
+	actions = FilterAction(actions, func(a models.Action) bool {
+		return a.Enforce
+	})
+
 	choosenAction := pickRandomAction(actions)
 	log.Debugf("Choosen Action for user %q: %+v", user.Fullname, choosenAction)
 
