@@ -1,5 +1,6 @@
 .vscode
-/Actionizer
+bin/
+vendor/
 actions.json
 tasks.json
 users.json
